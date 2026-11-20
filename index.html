@@ -141,7 +141,13 @@ const MEMORIES = [
 /* ans = index of the right option (0 = first). */
 const QUIZ = [
   {q:"Our go-to hangout snack?", o:["Vada pav + chai","Misal pav","Samosa + chai","Bhaji pav"], ans:0},
-  {q:"Who is always late?", o:["Mayur","Swapnil","Both of us","Nobody, we're perfect"], ans:1},
+  {q:"Who is always late?", o:["Mayur","Swapnil","Both of us","Nobody, we're perfect"], ans:3,
+   funny:[
+    ["Wrong! Mayur is never late 😇 Try again!","Wrong again! Stop blaming Mayur 😂 One more try!"],
+    ["Wrong! Swapnil is never late, he just arrives in his own time zone ⏰ Try again!","Wrong AGAIN! Swapnil says: “I'm on the way!” 🏍️ One more try!"],
+    ["Wrong! We're not THAT bad 😂 Try again!","Wrong again! Even together? Come on 🙄 One more try!"],
+    ["Wrong! Too easy, nobody believes that 🤨 Try again!","Wrong! Still no! Think harder 🧠 One more try!"]
+   ]},
   {q:"What do we do the most when we meet?", o:["Gossip","Plan a startup","Watch cricket","Sleep"], ans:1},
   {q:"Our all-time favourite plan?", o:["Movie night","Going on bike rides","Cricket match","Staying home"], ans:1}
 ];
@@ -172,10 +178,10 @@ function go(n){
 }
 
 /* Level 1 */
-let qi=0; const RESULTS=[];
+let qi=0, tries=0; const RESULTS=[];
 function showQ(){
   const Q=QUIZ[qi];
-  $("qh").textContent=Q.q; $("qf").textContent="";
+  tries=0; $("qh").textContent=Q.q; $("qf").textContent="";
   $("qo").innerHTML="";
   Q.o.forEach((t,i)=>{
     const b=document.createElement("button");
@@ -186,6 +192,22 @@ function showQ(){
 }
 function pick(i){
   const Q=QUIZ[qi], bs=[...$("qo").children];
+  if(Q.funny){
+    tries++;
+    if(tries<3){
+      bs.forEach(b=>b.classList.remove("bad"));
+      bs[i].classList.add("bad");
+      $("qf").textContent=Q.funny[i][tries-1];
+      return;
+    }
+    bs.forEach(b=>b.disabled=true);
+    bs[Q.ans].classList.add("good");
+    $("qf").textContent="Okay okay, I'll tell you: the correct answer is “"+Q.o[Q.ans]+"” 😎 +20 XP";
+    RESULTS.push(Q.q+" → 3rd try pick: "+Q.o[i]+" (told the answer: "+Q.o[Q.ans]+")");
+    addXP(20); pop(40);
+    setTimeout(()=>{qi++; qi<QUIZ.length?showQ():go(2)},2600);
+    return;
+  }
   bs.forEach(b=>b.disabled=true);
   const ok=i===Q.ans;
   bs[i].classList.add(ok?"good":"bad");
